@@ -1,34 +1,25 @@
 import api from "./axios";
 
 export const getCurrentUser = async () => {
-  const response = await api.get(
-    "/api/users/me"
-  );
+  const response = await api.get("/api/users/me");
 
   return response.data;
 };
 
 export const updateProfile = async (data) => {
-  const response = await api.put(
-    "/api/users/me",
-    data
-  );
+  const response = await api.put("/api/users/me", data);
 
   return response.data;
 };
 
 export const getUserById = async (userId) => {
-  const response = await api.get(
-    `/api/users/${userId}`
-  );
+  const response = await api.get(`/api/users/${userId}`);
 
   return response.data;
 };
 
-export const searchUsers = async (query) => {
-  const response = await api.get(
-    `/api/users/search?q=${query}`
-  );
+export const searchUsers = async (username) => {
+  const response = await api.get(`/api/users/search?username=${username}`);
 
-  return response.data;
+  return response.data.data;
 };

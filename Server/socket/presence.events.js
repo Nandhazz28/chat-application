@@ -1,25 +1,66 @@
-const onlineUsers = new Map();
+const EVENTS = {
+  USER_ONLINE:
+    "user-online",
 
-module.exports = (io, socket) => {
-  socket.on("user-online", (userId) => {
-    onlineUsers.set(userId, socket.id);
+  USER_OFFLINE:
+    "user-offline",
+};
 
-    io.emit("user-online", {
-      userId,
-    });
-  });
+const onlineUsers =
+  new Map();
 
-  socket.on("disconnect", () => {
-    for (const [userId, socketId] of onlineUsers.entries()) {
-      if (socketId === socket.id) {
-        onlineUsers.delete(userId);
+const registerPresenceEvents = (
+  io,
+  socket
+) => {
+  socket.on(
+    EVENTS.USER_ONLINE,
+    (userId) => {
+      onlineUsers.set(
+        userId,
+        socket.id
+      );
 
-        io.emit("user-offline", {
-          userId,
-        });
+      io.emit(
+        EVENTS.USER_ONLINE,
+        userId
+      );
+    }
+  );
 
-        break;
+  socket.on(
+    "disconnect",
+    () => {
+      let offlineUser =
+        null;
+
+      for (const [
+        userId,
+        socketId,
+      ] of onlineUsers) {
+        if (
+          socketId === socket.id
+        ) {
+          offlineUser =
+            userId;
+
+          onlineUsers.delete(
+            userId
+          );
+
+          break;
+        }
+      }
+
+      if (offlineUser) {
+        io.emit(
+          EVENTS.USER_OFFLINE,
+          offlineUser
+        );
       }
     }
-  });
+  );
 };
+
+module.exports =
+  registerPresenceEvents;

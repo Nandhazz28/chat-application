@@ -1,36 +1,92 @@
-const MessageBubble = ({ message, isOwn }) => {
+import SeenIndicator from "./SeenIndicator";
+import ImageMessage from "./ImageMessage";
+import VoiceMessage from "./VoiceMessage";
+
+const MessageBubble = ({
+  message,
+  currentUserId,
+}) => {
+  const isMine =
+    message?.sender ===
+      currentUserId ||
+    message?.sender?._id ===
+      currentUserId;
+
   return (
     <div
-      className={`flex ${
-        isOwn ? "justify-end" : "justify-start"
+      className={`flex mb-3 ${
+        isMine
+          ? "justify-end"
+          : "justify-start"
       }`}
     >
       <div
-        className={`max-w-xs px-4 py-2 rounded-2xl text-sm shadow
+        className={`max-w-md px-4 py-2 rounded-2xl shadow
         ${
-          isOwn
-            ? "bg-blue-500 text-white rounded-br-none"
-            : "bg-white text-gray-800 rounded-bl-none"
+          isMine
+            ? "bg-blue-500 text-white"
+            : "bg-white border"
         }`}
       >
+        {/* TEXT MESSAGE */}
 
-        <p>{message.text}</p>
-
-        {message.image && (
-          <img
-            src={message.image}
-            alt="attachment"
-            className="mt-2 rounded-lg"
-          />
+        {message?.content && (
+          <p className="break-words">
+            {message.content}
+          </p>
         )}
 
-        <div className="text-[10px] mt-1 opacity-70 text-right">
-          {new Date(message.createdAt).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-        </div>
+        {/* IMAGE MESSAGE */}
 
+        {message?.imageUrl && (
+          <div className="mt-2">
+            <ImageMessage
+              imageUrl={
+                message.imageUrl
+              }
+            />
+          </div>
+        )}
+
+        {/* VOICE MESSAGE */}
+
+        {message?.audioUrl && (
+          <div className="mt-2">
+            <VoiceMessage
+              audioUrl={
+                message.audioUrl
+              }
+            />
+          </div>
+        )}
+
+        {/* FOOTER */}
+
+        <div className="flex items-center justify-end gap-2 mt-2 text-xs opacity-80">
+          <span>
+            {message?.createdAt
+              ? new Date(
+                  message.createdAt
+                ).toLocaleTimeString(
+                  [],
+                  {
+                    hour:
+                      "2-digit",
+                    minute:
+                      "2-digit",
+                  }
+                )
+              : ""}
+          </span>
+
+          {isMine && (
+            <SeenIndicator
+              seen={
+                message?.seen
+              }
+            />
+          )}
+        </div>
       </div>
     </div>
   );

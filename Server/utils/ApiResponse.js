@@ -1,4 +1,3 @@
-
 class ApiResponse {
   constructor(statusCode, message, data = null) {
     this.success = true;

@@ -1,35 +1,47 @@
 import { useState } from "react";
 
-const MessageInput = ({ onSend }) => {
-  const [text, setText] = useState("");
+const MessageInput = ({
+  onSend,
+}) => {
+  const [text, setText] =
+    useState("");
 
-  const handleSend = () => {
+  const handleSubmit = (
+    e
+  ) => {
+    e.preventDefault();
+
     if (!text.trim()) return;
 
-    onSend?.(text);
+    onSend(text);
+
     setText("");
   };
 
   return (
-    <div className="flex items-center gap-2 p-3 border-t bg-white">
-
+    <form
+      onSubmit={handleSubmit}
+      className="border-t bg-white p-4 flex gap-2"
+    >
       <input
         type="text"
         value={text}
-        onChange={(e) => setText(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && handleSend()}
+        onChange={(e) =>
+          setText(
+            e.target.value
+          )
+        }
         placeholder="Type a message..."
-        className="flex-1 border rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className="flex-1 border rounded-lg px-4 py-2"
       />
 
       <button
-        onClick={handleSend}
-        className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm hover:bg-blue-600"
+        type="submit"
+        className="bg-blue-500 text-white px-4 rounded-lg"
       >
         Send
       </button>
-
-    </div>
+    </form>
   );
 };
 

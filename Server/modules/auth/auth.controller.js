@@ -44,8 +44,31 @@ const login = asyncHandler(
     );
   }
 );
+const User = require("../users/user.model"); 
+
+const getMe = async (req, res) => {
+  try {
+    const token =
+      req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
+      return res.status(401).json({
+        message: "No token provided",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Authenticated",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
 module.exports = {
   register,
   login,
+  getMe,
 };

@@ -2,7 +2,7 @@ import { useState } from "react";
 
 const RegisterForm = ({ onSubmit, loading }) => {
   const [form, setForm] = useState({
-    name: "",
+    username: "",
     email: "",
     password: "",
   });
@@ -34,9 +34,9 @@ const RegisterForm = ({ onSubmit, loading }) => {
         {/* NAME */}
         <input
           type="text"
-          name="name"
-          placeholder="Name"
-          value={form.name}
+          name="username"
+          placeholder="Username"
+          value={form.username}
           onChange={handleChange}
           className="w-full mb-4 px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
@@ -51,7 +51,6 @@ const RegisterForm = ({ onSubmit, loading }) => {
           className="w-full mb-4 px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
 
-        {/* PASSWORD */}
         <input
           type="password"
           name="password"
@@ -61,7 +60,6 @@ const RegisterForm = ({ onSubmit, loading }) => {
           className="w-full mb-6 px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
 
-        {/* BUTTON */}
         <button
           type="submit"
           disabled={loading}

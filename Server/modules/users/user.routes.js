@@ -7,9 +7,20 @@ const protect = require(
 const {
   getProfile,
   updateProfile,
+  searchUsers,
 } = require("./user.controller");
 
-router.get("/me", protect, getProfile);
+router.get(
+  "/search",
+  protect,
+  searchUsers
+);
+
+router.get(
+  "/me",
+  protect,
+  getProfile
+);
 
 router.put(
   "/me",

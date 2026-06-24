@@ -1,41 +1,86 @@
-import ChatWindow from "../../components/conversations/ChatWindow";
+import { useEffect } from "react";
+
+import {
+  getMessages,
+} from "../../services/conversation.services";
+
+import {
+  useChatContext,
+} from "../../shared/context/ChatContext";
 
 const ActiveChatPage = ({
   conversation,
 }) => {
+  const {
+    messages,
+    setMessages,
+  } = useChatContext();
+
+  useEffect(() => {
+    if (!conversation)
+      return;
+
+    const fetchMessages =
+      async () => {
+        try {
+          const response =
+            await getMessages(
+              conversation._id
+            );
+
+          setMessages(
+            response.data ||
+              response
+          );
+        } catch (error) {
+          console.error(error);
+        }
+      };
+
+    fetchMessages();
+  }, [conversation]);
+
   if (!conversation) {
     return (
-      <div className="h-full flex items-center justify-center text-gray-500">
+      <div className="h-full flex items-center justify-center">
         Select a conversation
       </div>
     );
   }
 
-  const messages = [
-    {
-      _id: "1",
-      text: "Hello",
-      senderId: "user1",
-      createdAt: Date.now(),
-    },
-    {
-      _id: "2",
-      text: "Hi bro",
-      senderId: "me",
-      createdAt: Date.now(),
-    },
-  ];
-
-  const handleSend = (text) => {
-    console.log("Send:", text);
-  };
-
   return (
-    <ChatWindow
-      messages={messages}
-      currentUserId="me"
-      onSend={handleSend}
-    />
+    <div className="h-full flex flex-col">
+
+      <div className="border-b p-4 bg-white">
+        <h2 className="font-semibold">
+          {
+            conversation
+              ?.participant
+              ?.name
+          }
+        </h2>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-4">
+
+        {messages.map(
+          (message) => (
+            <div
+              key={
+                message._id
+              }
+              className="mb-2"
+            >
+              {
+                message.content
+              }
+            </div>
+          )
+        )}
+
+      </div>
+
+    </div>
   );
 };
 

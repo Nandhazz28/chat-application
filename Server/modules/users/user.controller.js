@@ -44,8 +44,32 @@ const updateProfile = asyncHandler(
     );
   }
 );
+const searchUsers =
+  asyncHandler(
+    async (req, res) => {
+      const {
+        username,
+      } = req.query;
+
+      const users =
+        await userService.searchUsers(
+          username
+        );
+
+      return res
+        .status(200)
+        .json(
+          new ApiResponse(
+            200,
+            "Users found",
+            users
+          )
+        );
+    }
+  );
 
 module.exports = {
   getProfile,
   updateProfile,
+  searchUsers,
 };

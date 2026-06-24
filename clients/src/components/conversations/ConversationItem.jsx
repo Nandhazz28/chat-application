@@ -1,14 +1,25 @@
+import OnlineIndicator from "./OnlineIndicator";
+import UnreadBadge from "./UnreadBadge";
+
 const ConversationItem = ({
   conversation,
   active,
   onClick,
+  onlineUsers = [],
 }) => {
-  const user = conversation.participant;
+  const user =
+    conversation?.participant ||
+    {};
+
+  const isOnline =
+    onlineUsers.includes(
+      user._id
+    );
 
   return (
     <div
       onClick={onClick}
-      className={`flex items-center gap-3 p-4 cursor-pointer border-b transition
+      className={`flex items-center gap-3 p-4 border-b cursor-pointer transition-all
       ${
         active
           ? "bg-blue-50"
@@ -16,31 +27,41 @@ const ConversationItem = ({
       }`}
     >
 
-      {/* AVATAR */}
-      <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold">
-        {user?.name?.charAt(0)}
-      </div>
-
-      {/* INFO */}
-      <div className="flex-1">
-        <div className="flex justify-between items-center">
-          <h3 className="font-medium text-sm">
-            {user?.name}
-          </h3>
-
-          {conversation.unreadCount > 0 && (
-            <span className="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
-              {conversation.unreadCount}
-            </span>
-          )}
+      <div className="relative">
+        <div className="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-lg">
+          {user?.name?.charAt(0) ||
+            "U"}
         </div>
 
-        <p className="text-xs text-gray-500 truncate">
-          {conversation.lastMessage?.text ||
+        <div className="absolute bottom-0 right-0">
+          <OnlineIndicator
+            online={isOnline}
+          />
+        </div>
+      </div>
+
+
+      <div className="flex-1 min-w-0">
+        <div className="flex justify-between items-center">
+          <h3 className="font-medium truncate">
+            {user?.name ||
+              "Unknown User"}
+          </h3>
+
+          <UnreadBadge
+            count={
+              conversation?.unreadCount
+            }
+          />
+        </div>
+
+        <p className="text-sm text-gray-500 truncate">
+          {conversation
+            ?.lastMessage
+            ?.content ||
             "No messages yet"}
         </p>
       </div>
-
     </div>
   );
 };

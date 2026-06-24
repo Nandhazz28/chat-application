@@ -16,6 +16,17 @@ const findByUsername = (username) => {
   return User.findOne({ username });
 };
 
+const searchUsers = (username) => {
+  return User.find({
+    username: {
+      $regex: username,
+      $options: "i",
+    },
+  }).select(
+    "_id username name profilePicture"
+  );
+};
+
 const updateById = (id, data) => {
   return User.findByIdAndUpdate(
     id,
@@ -29,5 +40,6 @@ module.exports = {
   findById,
   findByEmail,
   findByUsername,
+  searchUsers,
   updateById,
 };

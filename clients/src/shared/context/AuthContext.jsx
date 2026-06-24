@@ -21,10 +21,21 @@ export const AuthProvider = ({
   useEffect(() => {
     const fetchUser = async () => {
       try {
+        const token =
+          localStorage.getItem(
+            "token"
+          );
+
+        if (!token) {
+          setLoading(false);
+          return;
+        }
+
         const data = await getMe();
 
         setUser(data);
       } catch (error) {
+        console.error(error);
         setUser(null);
       } finally {
         setLoading(false);
@@ -34,12 +45,26 @@ export const AuthProvider = ({
     fetchUser();
   }, []);
 
+  const login = (userData) => {
+    setUser(userData);
+  };
+
+  const logout = () => {
+    localStorage.removeItem(
+      "token"
+    );
+
+    setUser(null);
+  };
+
   return (
     <AuthContext.Provider
       value={{
         user,
         setUser,
         loading,
+        login,
+        logout,
       }}
     >
       {children}
