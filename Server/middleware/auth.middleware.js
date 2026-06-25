@@ -3,20 +3,25 @@ const env = require("../config/env");
 
 const protect = (req, res, next) => {
   try {
-    console.log("AUTH HEADER:", req.headers.authorization);
-
     const authHeader = req.headers.authorization;
 
-    if (!authHeader?.startsWith("Bearer ")) {
+    console.log("AUTH HEADER:", authHeader);
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
         success: false,
-        message: "Unauthorized",
+        message: "Unauthorized - No token",
       });
     }
 
     const token = authHeader.split(" ")[1];
 
-    console.log("TOKEN:", token);
+    if (!token || token === "undefined") {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid token",
+      });
+    }
 
     const decoded = jwt.verify(token, env.JWT_ACCESS_SECRET);
 
@@ -30,7 +35,7 @@ const protect = (req, res, next) => {
 
     return res.status(401).json({
       success: false,
-      message: "Invalid token",
+      message: "Token expired or invalid",
     });
   }
 };

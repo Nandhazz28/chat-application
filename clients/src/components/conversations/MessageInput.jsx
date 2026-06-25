@@ -1,45 +1,60 @@
 import { useState } from "react";
+import { SendHorizontal, Paperclip, Mic } from "lucide-react";
+import api from "../../services/axios";
 
-const MessageInput = ({
-  onSend,
-}) => {
-  const [text, setText] =
-    useState("");
+const MessageInput = ({ conversationId, setMessages }) => {
+  const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (
-    e
-  ) => {
+  const handleSend = async (e) => {
     e.preventDefault();
+    if (!text.trim() || !conversationId) return;
 
-    if (!text.trim()) return;
+    try {
+      setLoading(true);
 
-    onSend(text);
+      const res = await api.post("/api/messages", {
+        conversationId,
+        content: text,
+      });
 
-    setText("");
+      const newMessage = res?.data?.data;
+
+      // 🔥 INSTANT UI UPDATE
+      setMessages((prev) => [...prev, newMessage]);
+
+      setText("");
+    } catch (err) {
+      console.error("Send error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="border-t bg-white p-4 flex gap-2"
-    >
+    <form onSubmit={handleSend} className="flex items-center gap-2 p-3 border-t border-white/10">
+
+      <button type="button">
+        <Paperclip className="w-4 h-4" />
+      </button>
+
       <input
-        type="text"
         value={text}
-        onChange={(e) =>
-          setText(
-            e.target.value
-          )
-        }
-        placeholder="Type a message..."
-        className="flex-1 border rounded-lg px-4 py-2"
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Type message..."
+        className="flex-1 bg-transparent border px-3 py-2 rounded text-white"
       />
+
+      <button type="button">
+        <Mic className="w-4 h-4" />
+      </button>
 
       <button
         type="submit"
-        className="bg-blue-500 text-white px-4 rounded-lg"
+        disabled={loading}
+        className="bg-purple-600 px-3 py-2 rounded text-white"
       >
-        Send
+        <SendHorizontal className="w-4 h-4" />
       </button>
     </form>
   );
