@@ -4,11 +4,10 @@ import ImageMessage from "./ImageMessage";
 import VoiceMessage from "./VoiceMessage";
 
 const MessageBubble = ({ message, currentUserId }) => {
-  const isMine =
-    message?.sender === currentUserId ||
-    message?.sender?._id === currentUserId;
+  // Server stores senderId (ObjectId or populated object)
+  const senderId = message?.senderId?._id || message?.senderId;
+  const isMine = String(senderId) === String(currentUserId);
 
-  // Safe Date parsing to eliminate runtime RangeErrors/Crashes
   let formattedTime = "";
   if (message?.createdAt) {
     const dateObj = new Date(message.createdAt);
@@ -22,16 +21,23 @@ const MessageBubble = ({ message, currentUserId }) => {
 
   return (
     <div
-      className={`flex w-full mb-4 animate-fade-in ${
+      className={`flex w-full mb-3 animate-fade-in ${
         isMine ? "justify-end" : "justify-start"
       }`}
     >
+      {/* Avatar for other user */}
+      {!isMine && (
+        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 flex items-center justify-center text-white text-xs font-bold mr-2 flex-shrink-0 self-end border border-white/10">
+          {(message?.senderId?.username || "?").charAt(0).toUpperCase()}
+        </div>
+      )}
+
       <div
         className={`relative max-w-md px-4 py-2.5 shadow-xl transition-all duration-200
         ${
           isMine
-            ? "bg-gradient-to-br from-purple-600 to-pink-600 text-white rounded-2xl rounded-tr-xs shadow-purple-950/20"
-            : "bg-white/[0.03] border border-white/10 text-slate-100 rounded-2xl rounded-tl-xs backdrop-blur-md shadow-black/40"
+            ? "bg-gradient-to-br from-purple-600 to-pink-600 text-white rounded-2xl rounded-tr-sm shadow-purple-950/20"
+            : "bg-white/[0.03] border border-white/10 text-slate-100 rounded-2xl rounded-tl-sm backdrop-blur-md shadow-black/40"
         }`}
       >
         {/* TEXT MESSAGE */}
@@ -55,16 +61,15 @@ const MessageBubble = ({ message, currentUserId }) => {
           </div>
         )}
 
-        {/* FOOTER META DATA */}
+        {/* FOOTER META */}
         <div
           className={`flex items-center justify-end gap-1.5 mt-1.5 text-[10px] font-mono tracking-wider select-none opacity-60 ${
             isMine ? "text-purple-200" : "text-slate-400"
           }`}
         >
           <span>{formattedTime}</span>
-
           {isMine && (
-            <div className="flex-shrink-0 transformation transition-transform duration-150 scale-90">
+            <div className="flex-shrink-0 transition-transform duration-150 scale-90">
               <SeenIndicator seen={message?.seen} />
             </div>
           )}

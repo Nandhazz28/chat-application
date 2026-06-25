@@ -1,5 +1,4 @@
 const { Server } = require("socket.io");
-
 const registerMessageEvents = require("./message.events");
 const registerTypingEvents = require("./typing.events");
 const registerPresenceEvents = require("./presence.events");
@@ -15,6 +14,7 @@ const initializeSocket = (server) => {
   io.on("connection", (socket) => {
     console.log(`Socket Connected: ${socket.id}`);
 
+    // Register modular events
     registerMessageEvents(io, socket);
     registerTypingEvents(io, socket);
     registerPresenceEvents(io, socket);

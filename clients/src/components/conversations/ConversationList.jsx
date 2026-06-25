@@ -1,56 +1,58 @@
 import React from "react";
-import { Radio, Loader2, Orbit } from "lucide-react";
-import ConversationItem from "./ConversationItem";
+import OnlineIndicator from "./OnlineIndicator";
+import UnreadBadge from "./UnreadBadge";
 
-const ConversationList = ({
-  conversations = [],
-  activeId,
-  onSelect,
-  loading,
-}) => {
+const ConversationItem = ({ conversation, active, onClick, onlineUsers = [] }) => {
+  const user = conversation?.participant || {};
+  const isOnline = onlineUsers.includes(user._id);
+  const displayName = user?.username || user?.name || "Unknown User";
+  const lastMsg = conversation?.lastMessage?.content || "No messages yet";
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onClick?.();
+    }
+  };
+
   return (
-    <div className="h-full overflow-y-auto bg-[#030014] border-r border-white/5 scrollbar-thin scrollbar-thumb-white/5 scrollbar-track-transparent">
-
-      {/* HEADER */}
-      <div className="sticky top-0 z-20 p-4 border-b border-white/5 bg-[#030014]/80 backdrop-blur-md flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-pink-500/10 border border-pink-500/20 shadow-[0_0_15px_rgba(219,39,119,0.15)]">
-            <Radio className="w-4 h-4 text-pink-400 animate-pulse" />
-          </div>
-          <h2 className="font-bold text-base tracking-wide text-white">
-            Channels
-          </h2>
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={handleKeyDown}
+      className={`flex items-center gap-3.5 p-4 border-b border-white/5 cursor-pointer transition-all duration-200 outline-none select-none
+        ${active
+          ? "bg-gradient-to-r from-purple-500/15 via-pink-500/5 to-transparent relative after:absolute after:left-0 after:top-2 after:bottom-2 after:w-1 after:bg-gradient-to-b after:from-purple-500 after:to-pink-500 after:rounded-r-md"
+          : "hover:bg-white/[0.02]"
+        }
+        focus-visible:bg-white/[0.04]
+      `}
+    >
+      <div className="relative flex-shrink-0">
+        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 text-white flex items-center justify-center font-bold text-sm tracking-wide shadow-[0_0_15px_rgba(168,85,247,0.25)] border border-white/10">
+          {displayName.charAt(0).toUpperCase()}
         </div>
-        <div className="text-[10px] font-mono bg-white/5 px-2 py-0.5 rounded text-slate-400 border border-white/5">
-          {conversations.length} Active
+        <div className="absolute -bottom-0.5 -right-0.5 rounded-full ring-2 ring-[#030014]">
+          <OnlineIndicator online={isOnline} />
         </div>
       </div>
 
-      {/* LIST ARCHITECTURE */}
-      <div className="divide-y divide-white/[0.02]">
-        {loading ? (
-          <div className="flex flex-col items-center justify-center p-12 text-slate-400 text-xs font-mono tracking-widest gap-3">
-            <Loader2 className="w-5 h-5 animate-spin text-purple-500" />
-            <span>SYNCING MATRIX...</span>
+      <div className="flex-1 min-w-0">
+        <div className="flex justify-between items-center gap-2 mb-1">
+          <h3 className={`text-sm font-semibold truncate transition-colors duration-150 ${active ? "text-white" : "text-slate-200"}`}>
+            {displayName}
+          </h3>
+          <div className="flex-shrink-0">
+            <UnreadBadge count={conversation?.unreadCount} />
           </div>
-        ) : conversations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-12 text-slate-500 text-xs font-mono tracking-wide gap-2 text-center opacity-60">
-            <Orbit className="w-6 h-6 stroke-[1.5] text-slate-600 animate-spin [animation-duration:10s]" />
-            <span>ORBIT IS EMPTY</span>
-          </div>
-        ) : (
-          conversations.map((conv) => (
-            <ConversationItem
-              key={conv._id}
-              conversation={conv}
-              active={activeId === conv._id}
-              onClick={() => onSelect(conv)}
-            />
-          ))
-        )}
+        </div>
+        <p className="text-xs text-slate-400 font-medium truncate tracking-wide">
+          {lastMsg}
+        </p>
       </div>
     </div>
   );
 };
 
-export default ConversationList;
+export default ConversationItem;

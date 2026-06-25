@@ -1,74 +1,53 @@
-const asyncHandler = require(
-  "../../utils/asyncHandler"
-);
+const asyncHandler = require("../../utils/asyncHandler");
+const ApiResponse = require("../../utils/ApiResponse");
+const authService = require("./auth.service");
+const jwt = require("jsonwebtoken");
+const env = require("../../config/env");
+const User = require("../users/user.model");
 
-const ApiResponse = require(
-  "../../utils/ApiResponse"
-);
+const register = asyncHandler(async (req, res) => {
+  const user = await authService.register(req.body);
+  return res
+    .status(201)
+    .json(new ApiResponse(201, "User registered successfully", user));
+});
 
-const authService = require(
-  "./auth.service"
-);
+const login = asyncHandler(async (req, res) => {
+  const result = await authService.login(req.body.email, req.body.password);
+  return res.status(200).json(new ApiResponse(200, "Login successful", result));
+});
 
-const register = asyncHandler(
-  async (req, res) => {
-    const user =
-      await authService.register(
-        req.body
-      );
-
-    return res.status(201).json(
-      new ApiResponse(
-        201,
-        "User registered successfully",
-        user
-      )
-    );
-  }
-);
-
-const login = asyncHandler(
-  async (req, res) => {
-    const result =
-      await authService.login(
-        req.body.email,
-        req.body.password
-      );
-
-    return res.status(200).json(
-      new ApiResponse(
-        200,
-        "Login successful",
-        result
-      )
-    );
-  }
-);
-const User = require("../users/user.model"); 
-
-const getMe = async (req, res) => {
+const getMe = asyncHandler(async (req, res) => {
   try {
-    const token =
-      req.headers.authorization?.split(" ")[1];
-
-    if (!token) {
-      return res.status(401).json({
-        message: "No token provided",
-      });
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res
+        .status(401)
+        .json({ success: false, message: "No token provided" });
     }
 
-    return res.status(200).json({
-      message: "Authenticated",
-    });
-  } catch (error) {
-    return res.status(500).json({
-      message: error.message,
-    });
-  }
-};
+    const token = authHeader.split(" ")[1];
+    if (!token || token === "undefined") {
+      return res.status(401).json({ success: false, message: "Invalid token" });
+    }
 
-module.exports = {
-  register,
-  login,
-  getMe,
-};
+    const decoded = jwt.verify(token, env.JWT_ACCESS_SECRET);
+    const user = await User.findById(decoded.userId).select("-password");
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "Authenticated", { user }));
+  } catch (error) {
+    return res
+      .status(401)
+      .json({ success: false, message: "Token expired or invalid" });
+  }
+});
+
+module.exports = { register, login, getMe };

@@ -12,18 +12,12 @@ const RegisterPage = () => {
   const handleRegister = async (formData) => {
     try {
       setLoading(true);
-      setError(""); // Evacuate stale warning layers
-
+      setError("");
       await register(formData);
-
-      // Successfully onboarded; forward to auth verification gateway
       navigate("/login");
     } catch (err) {
       console.error(err);
-      // Map exception payload directly to inline UI thread context
-      setError(
-        err?.response?.data?.message || "Registration failed"
-      );
+      setError(err?.response?.data?.message || "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -31,18 +25,12 @@ const RegisterPage = () => {
 
   return (
     <div className="relative min-h-screen w-full bg-[#030014] flex items-center justify-center p-4 overflow-hidden selection:bg-pink-500/30">
-      
-      {/* Immersive Background Space Matrix Glows */}
       <div className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full bg-pink-600/5 blur-[120px] pointer-events-none animate-pulse [animation-duration:6s]" />
       <div className="absolute bottom-1/4 left-1/4 w-96 h-96 rounded-full bg-purple-600/10 blur-[120px] pointer-events-none animate-pulse [animation-duration:4s]" />
 
-      {/* Structural Card Container Shell */}
       <div className="relative w-full max-w-md bg-[#080425]/40 border border-white/10 rounded-2xl p-8 shadow-2xl shadow-purple-950/20 backdrop-blur-xl z-10 transition-all duration-300 hover:border-purple-500/20">
-        
-        {/* Subtle top edge border gradient highlight */}
         <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/40 to-transparent" />
 
-        {/* BRAND IDENTITY IDENTITY HEADER */}
         <div className="flex flex-col items-center text-center mb-8 select-none">
           <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 shadow-[0_0_20px_rgba(168,85,247,0.15)] mb-3">
             <UserPlus className="w-5 h-5 text-pink-400" />
@@ -56,20 +44,21 @@ const RegisterPage = () => {
           </p>
         </div>
 
-        {/* INLINE ERROR TELEMETRY ALERTS */}
         {error && (
-          <div 
-            role="alert"
-            className="flex items-start gap-2.5 bg-rose-500/10 border border-rose-500/20 rounded-xl p-3 mb-6 text-xs text-rose-400 font-mono tracking-wide animate-fade-in"
-          >
+          <div role="alert" className="flex items-start gap-2.5 bg-rose-500/10 border border-rose-500/20 rounded-xl p-3 mb-6 text-xs text-rose-400 font-mono tracking-wide">
             <AlertCircle className="w-4 h-4 stroke-[2] flex-shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
         )}
 
-        {/* APPLICATION REGISTER FORM LAYER */}
         <RegisterForm onSubmit={handleRegister} loading={loading} />
 
+        <p className="text-center text-xs text-slate-500 mt-6">
+          Already have an account?{" "}
+          <a href="/login" className="text-purple-400 hover:text-pink-400 transition-colors">
+            Sign In
+          </a>
+        </p>
       </div>
     </div>
   );
