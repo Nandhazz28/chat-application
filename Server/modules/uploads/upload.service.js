@@ -1,20 +1,36 @@
 const cloudinary = require("../../config/cloudinary");
+const ApiError = require("../../utils/ApiError");
 
-const uploadToCloudinary = async (file, folder = "chat-app") => {
+const uploadToCloudinary = (file, folder, resourceType = "auto") => {
   return new Promise((resolve, reject) => {
+    if (!file || !file.buffer) {
+      return reject(ApiError.badRequest("No file buffer provided"));
+    }
+
     const stream = cloudinary.uploader.upload_stream(
-      { folder, resource_type: "auto" },
+      {
+        folder,
+        resource_type: resourceType,
+      },
       (error, result) => {
         if (error) return reject(error);
-        resolve({ url: result.secure_url, publicId: result.public_id });
-      },
+
+        resolve({
+          url: result.secure_url,
+          publicId: result.public_id,
+        });
+      }
     );
+
     stream.end(file.buffer);
   });
 };
 
-const uploadImage = async (file) => uploadToCloudinary(file, "chat-app/images");
-const uploadAudio = async (file) => uploadToCloudinary(file, "chat-app/audio");
-const uploadFile = async (file) => uploadToCloudinary(file, "chat-app/files");
+exports.uploadImage = (file) =>
+  uploadToCloudinary(file, "chat-app/images", "image");
 
-module.exports = { uploadImage, uploadAudio, uploadFile };
+exports.uploadAudio = (file) =>
+  uploadToCloudinary(file, "chat-app/audio", "video");
+
+exports.uploadFile = (file) =>
+  uploadToCloudinary(file, "chat-app/files", "auto");

@@ -1,91 +1,67 @@
-const authRepository = require(
-  "./auth.repository"
-);
+const authRepository = require("./auth.repository");
+const { hashPassword, comparePassword } = require("../../utils/hash");
+const { generateAccessToken, generateRefreshToken, verifyRefreshToken } = require("../../utils/jwt");
+const ApiError = require("../../utils/ApiError");
 
-const {
-  hashPassword,
-  comparePassword,
-} = require("../../utils/hash");
-
-const {
-  generateAccessToken,
-  generateRefreshToken,
-} = require("../../utils/jwt");
-
-const register = async (
-  userData
-) => {
-  const existingUser =
-    await authRepository.findUserByEmail(
-      userData.email
-    );
-
-  if (existingUser) {
-    throw new Error(
-      "Email already exists"
-    );
+const register = async (userData) => {
+  const existing = await authRepository.findUserByEmail(userData.email);
+  if (existing) {
+    throw ApiError.badRequest("Email already in use");
   }
 
-  const hashedPassword =
-    await hashPassword(
-      userData.password
-    );
-
-  const user =
-    await authRepository.createUser({
-      ...userData,
-      password: hashedPassword,
-    });
+  const hashedPassword = await hashPassword(userData.password);
+  const user = await authRepository.createUser({
+    ...userData,
+    password: hashedPassword,
+  });
 
   return user;
 };
 
-const login = async (
-  email,
-  password
-) => {
-  const user =
-    await authRepository.findUserByEmail(
-      email
-    );
-
+const login = async (email, password) => {
+  const user = await authRepository.findUserByEmail(email);
   if (!user) {
-    throw new Error(
-      "Invalid credentials"
-    );
+    throw ApiError.unauthorized("Invalid email or password");
   }
 
-  const isMatch =
-    await comparePassword(
-      password,
-      user.password
-    );
-
+  const isMatch = await comparePassword(password, user.password);
   if (!isMatch) {
-    throw new Error(
-      "Invalid credentials"
-    );
+    throw ApiError.unauthorized("Invalid email or password");
   }
 
-  const accessToken =
-    generateAccessToken(user._id);
+  const accessToken = generateAccessToken(user._id);
+  const refreshToken = generateRefreshToken(user._id);
 
-  const refreshToken =
-    generateRefreshToken(user._id);
+  await authRepository.saveRefreshToken(user._id, refreshToken);
 
-  await authRepository.saveRefreshToken(
-    user._id,
-    refreshToken
-  );
+  // Return user without password
+  const { password: _, ...userObj } = user.toObject();
 
-  return {
-    user,
-    accessToken,
-    refreshToken,
-  };
+  return { user: userObj, accessToken, refreshToken };
 };
 
-module.exports = {
-  register,
-  login,
+const refresh = async (token) => {
+  if (!token) throw ApiError.unauthorized("No refresh token");
+
+  const existing = await authRepository.findRefreshToken(token);
+  if (!existing) throw ApiError.unauthorized("Invalid refresh token");
+
+  let decoded;
+  try {
+    decoded = verifyRefreshToken(token);
+  } catch {
+    await authRepository.deleteRefreshToken(token);
+    throw ApiError.unauthorized("Refresh token expired, please login again");
+  }
+
+  const accessToken = generateAccessToken(decoded.userId);
+  return { accessToken };
 };
+
+const logout = async (token) => {
+  if (token) {
+    await authRepository.deleteRefreshToken(token);
+  }
+};
+
+module.exports = { register, login, refresh, logout };

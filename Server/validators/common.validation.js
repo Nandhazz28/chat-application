@@ -1,16 +1,22 @@
 const validate = (schema) => {
   return (req, res, next) => {
-    try {
-      schema.parse(req.body);
+    const result = schema.safeParse(req.body);
 
-      next();
-    } catch (error) {
+    if (!result.success) {
+      const errors = result.error.issues.map((issue) => ({
+        field: issue.path.join("."),
+        message: issue.message,
+      }));
+
       return res.status(400).json({
         success: false,
-        message: "Validation Error",
-        errors: error.errors,
+        message: "Validation error",
+        errors,
       });
     }
+
+    req.body = result.data;
+    next();
   };
 };
 

@@ -1,26 +1,29 @@
 const User = require("./user.model");
 
-const create = (data) => User.create(data);
 const findById = (id) => User.findById(id).select("-password");
+
 const findByEmail = (email) => User.findOne({ email });
+
 const findByUsername = (username) => User.findOne({ username });
 
-const searchUsers = (query, excludeId) =>
-  User.find({
-    $or: [
-      { username: { $regex: query, $options: "i" } },
-      { email: { $regex: query, $options: "i" } },
-    ],
+// Escape special regex chars to prevent ReDoS / NoSQL injection
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const searchUsers = (query, excludeId) => {
+  const safe = escapeRegex(query.trim());
+  const regex = new RegExp(safe, "i");
+  return User.find({
+    $or: [{ username: regex }, { email: regex }],
     _id: { $ne: excludeId },
   })
     .select("_id username email avatar isOnline lastSeen")
     .limit(20);
+};
 
 const updateById = (id, data) =>
-  User.findByIdAndUpdate(id, { $set: data }, { new: true }).select("-password");
+  User.findByIdAndUpdate(id, { $set: data }, { new: true, runValidators: true }).select("-password");
 
 module.exports = {
-  create,
   findById,
   findByEmail,
   findByUsername,

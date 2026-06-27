@@ -13,7 +13,10 @@ const createConversation = asyncHandler(async (req, res) => {
 });
 
 const getConversation = asyncHandler(async (req, res) => {
-  const conversation = await conversationService.getConversation(req.params.id);
+  const conversation = await conversationService.getConversation(
+    req.params.id,
+    req.user.userId
+  );
   return res
     .status(200)
     .json(new ApiResponse(200, "Conversation fetched", conversation));
@@ -21,7 +24,7 @@ const getConversation = asyncHandler(async (req, res) => {
 
 const getUserConversations = asyncHandler(async (req, res) => {
   const conversations = await conversationService.getUserConversations(
-    req.user.userId,
+    req.user.userId
   );
   return res
     .status(200)

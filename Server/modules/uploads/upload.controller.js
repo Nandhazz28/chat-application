@@ -1,28 +1,46 @@
-const asyncHandler = require("../../utils/asyncHandler");
-const ApiResponse = require("../../utils/ApiResponse");
 const uploadService = require("./upload.service");
 
-const uploadImage = asyncHandler(async (req, res) => {
-  if (!req.file) return res.status(400).json({ success: false, message: "No file provided" });
-  const result = await uploadService.uploadImage(req.file);
-  return res.status(200).json(new ApiResponse(200, "Image uploaded", result));
-});
+const uploadImage = async (req, res, next) => {
+  try {
+    const data = await uploadService.uploadImage(req.file);
 
-const uploadAudio = asyncHandler(async (req, res) => {
-  if (!req.file) return res.status(400).json({ success: false, message: "No file provided" });
-  const result = await uploadService.uploadAudio(req.file);
-  return res.status(200).json(new ApiResponse(200, "Audio uploaded", result));
-});
+    res.status(200).json({
+      success: true,
+      data,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 
-const uploadFile = asyncHandler(async (req, res) => {
-  if (!req.file) return res.status(400).json({ success: false, message: "No file provided" });
-  const result = await uploadService.uploadFile(req.file);
-  return res.status(200).json(new ApiResponse(200, "File uploaded", {
-    ...result,
-    fileName: req.file.originalname,
-    fileSize: req.file.size,
-    fileType: req.file.mimetype,
-  }));
-});
+const uploadAudio = async (req, res, next) => {
+  try {
+    const data = await uploadService.uploadAudio(req.file);
 
-module.exports = { uploadImage, uploadAudio, uploadFile };
+    res.status(200).json({
+      success: true,
+      data,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const uploadFile = async (req, res, next) => {
+  try {
+    const data = await uploadService.uploadFile(req.file);
+
+    res.status(200).json({
+      success: true,
+      data,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = {
+  uploadImage,
+  uploadAudio,
+  uploadFile,
+};

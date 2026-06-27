@@ -1,20 +1,28 @@
+const { SOCKET_EVENTS } = require("../constants");
+
 const registerTypingEvents = (io, socket) => {
-  socket.on("join-conversation", (conversationId) => {
+  socket.on(SOCKET_EVENTS.JOIN_CONVERSATION, (conversationId) => {
+    if (!conversationId) return;
     socket.join(conversationId);
   });
 
-  socket.on("leave-conversation", (conversationId) => {
+  socket.on(SOCKET_EVENTS.LEAVE_CONVERSATION, (conversationId) => {
+    if (!conversationId) return;
     socket.leave(conversationId);
   });
 
-  socket.on("typing-start", ({ conversationId, userId, username }) => {
+  socket.on(SOCKET_EVENTS.TYPING_START, ({ conversationId, userId, username }) => {
+    if (!conversationId) return;
     socket
       .to(conversationId)
-      .emit("typing-start", { conversationId, userId, username });
+      .emit(SOCKET_EVENTS.TYPING_START, { conversationId, userId, username });
   });
 
-  socket.on("typing-stop", ({ conversationId, userId }) => {
-    socket.to(conversationId).emit("typing-stop", { conversationId, userId });
+  socket.on(SOCKET_EVENTS.TYPING_STOP, ({ conversationId, userId }) => {
+    if (!conversationId) return;
+    socket
+      .to(conversationId)
+      .emit(SOCKET_EVENTS.TYPING_STOP, { conversationId, userId });
   });
 };
 

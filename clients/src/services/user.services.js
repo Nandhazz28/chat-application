@@ -16,7 +16,13 @@ export const getUserById = async (userId) => {
 };
 
 export const searchUsers = async (username) => {
-  if (!username) return [];
-  const res = await api.get(`/api/users/search?username=${username}`);
-  return res.data.data;
+  if (!username.trim()) return [];
+
+  const response = await api.get("/api/users/search", {
+    params: {
+      username,
+    },
+  });
+
+  return response.data.data;
 };

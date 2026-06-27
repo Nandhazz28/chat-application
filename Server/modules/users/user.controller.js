@@ -13,10 +13,14 @@ const updateProfile = asyncHandler(async (req, res) => {
 });
 
 const searchUsers = asyncHandler(async (req, res) => {
-  const { username, q } = req.query;
-  const query = username || q || "";
+  const query = req.query.q || req.query.username || "";
   const users = await userService.searchUsers(query, req.user.userId);
   return res.status(200).json(new ApiResponse(200, "Users found", users));
 });
 
-module.exports = { getProfile, updateProfile, searchUsers };
+const getUserById = asyncHandler(async (req, res) => {
+  const user = await userService.getProfile(req.params.id);
+  return res.status(200).json(new ApiResponse(200, "User fetched", user));
+});
+
+module.exports = { getProfile, updateProfile, searchUsers, getUserById };

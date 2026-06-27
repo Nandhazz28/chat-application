@@ -12,15 +12,22 @@ const UserSearch = ({ onConversationCreated }) => {
   const [startingId, setStartingId]   = useState(null);
 
   const handleSearch = useCallback(async () => {
-    if (!query.trim()) return;
-    try {
-      setSearching(true);
-      const res = await searchUsers(query.trim());
-      setResults(res?.data || []);
-    } catch(e) { console.error(e); setResults([]); }
-    finally { setSearching(false); }
-  }, [query]);
+  if (!query.trim()) return;
+  try {
+    setSearching(true);
 
+    const users = await searchUsers(query.trim());
+
+    console.log("USERS:", users);
+
+    setResults(users || []);
+  } catch (err) {
+    console.error(err);
+    setResults([]);
+  } finally {
+    setSearching(false);
+  }
+}, [query]);
   const handleStart = async (userId) => {
     try {
       setStartingId(userId);
