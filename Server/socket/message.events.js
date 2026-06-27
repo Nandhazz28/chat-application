@@ -1,28 +1,34 @@
-const EVENTS = {
-  SEND_MESSAGE: "send-message",
-  RECEIVE_MESSAGE: "receive-message",
-};
-
 const registerMessageEvents = (io, socket) => {
-  
-  // Logic to handle incoming messages from a client
-  socket.on(EVENTS.SEND_MESSAGE, (data) => {
-    const { conversationId, senderId, text, timestamp } = data;
+  socket.on("send-message", (message) => {
+    if (!message?.conversationId) return;
+    socket.to(message.conversationId).emit("receive-message", message);
+  });
 
-    // Create a message object to broadcast
-    const messagePayload = {
-      conversationId,
-      senderId,
-      text,
-      timestamp: timestamp || new Date().toISOString(),
-      messageId: Date.now(), // Simple unique ID; use a UUID library for production
-    };
+  socket.on("message-edited", (message) => {
+    if (!message?.conversationId) return;
+    socket.to(message.conversationId).emit("message-edited", message);
+  });
 
-    // Broadcast the message to everyone in the specific conversation room
-    // The sender will also receive this if you want to update their UI immediately,
-    // or use socket.to(conversationId) to only send to others.
-    io.to(conversationId).emit(EVENTS.RECEIVE_MESSAGE, messagePayload);
+  socket.on("message-deleted", ({ conversationId, messageId, deleteFor }) => {
+    if (!conversationId) return;
+    socket.to(conversationId).emit("message-deleted", { messageId, deleteFor });
+  });
+
+  socket.on(
+    "message-reaction",
+    ({ conversationId, messageId, emoji, userId }) => {
+      if (!conversationId) return;
+      socket
+        .to(conversationId)
+        .emit("message-reaction", { messageId, emoji, userId });
+    },
+  );
+
+  socket.on("messages-seen", ({ conversationId, userId }) => {
+    if (!conversationId) return;
+    socket.to(conversationId).emit("messages-seen", { conversationId, userId });
   });
 };
 
 module.exports = registerMessageEvents;
+

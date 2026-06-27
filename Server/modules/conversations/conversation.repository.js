@@ -1,29 +1,42 @@
 const Conversation = require("./conversation.model");
 
-const create = (data) => {
-  return Conversation.create(data);
-};
+const create = (data) => Conversation.create(data);
 
-const findById = (id) => {
-  return Conversation.findById(id)
-    .populate("participants", "username avatar isOnline")
-    .populate("lastMessage");
-};
+const findById = (id) =>
+  Conversation.findById(id)
+    .populate("participants", "username avatar isOnline lastSeen")
+    .populate({
+      path: "lastMessage",
+      populate: { path: "senderId", select: "username" },
+    });
 
-const findUserConversations = (userId) => {
-  return Conversation.find({ participants: userId })
-    .populate("participants", "username avatar isOnline")
-    .populate("lastMessage")
+const findUserConversations = (userId) =>
+  Conversation.find({ participants: userId })
+    .populate("participants", "username avatar isOnline lastSeen")
+    .populate({
+      path: "lastMessage",
+      populate: { path: "senderId", select: "username" },
+    })
     .sort({ updatedAt: -1 });
-};
 
-const findPrivateConversation = (userId1, userId2) => {
-  return Conversation.findOne({
+const findPrivateConversation = (userId1, userId2) =>
+  Conversation.findOne({
     type: "private",
     participants: { $all: [userId1, userId2], $size: 2 },
   })
-    .populate("participants", "username avatar isOnline")
-    .populate("lastMessage");
-};
+    .populate("participants", "username avatar isOnline lastSeen")
+    .populate({
+      path: "lastMessage",
+      populate: { path: "senderId", select: "username" },
+    });
 
-module.exports = { create, findById, findUserConversations, findPrivateConversation };
+const updateById = (id, data) =>
+  Conversation.findByIdAndUpdate(id, { $set: data }, { new: true });
+
+module.exports = {
+  create,
+  findById,
+  findUserConversations,
+  findPrivateConversation,
+  updateById,
+};

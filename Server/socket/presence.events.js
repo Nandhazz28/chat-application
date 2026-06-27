@@ -1,32 +1,49 @@
-const EVENTS = {
-  USER_ONLINE: "user-online",
-  USER_OFFLINE: "user-offline",
-};
+const User = require("../modules/users/user.model");
 
-const onlineUsers = new Map(); // Map<userId, Set<socketId>>
+const onlineUsers = new Map();
 
 const registerPresenceEvents = (io, socket) => {
-  socket.on(EVENTS.USER_ONLINE, (userId) => {
-    if (!onlineUsers.has(userId)) {
-      onlineUsers.set(userId, new Set());
-    }
-    const userSockets = onlineUsers.get(userId);
-    userSockets.add(socket.id);
+  socket.on("user-online", async (userId) => {
+    if (!userId) return;
+    if (!onlineUsers.has(userId)) onlineUsers.set(userId, new Set());
+    onlineUsers.get(userId).add(socket.id);
+    socket.userId = userId;
 
-    if (userSockets.size === 1) {
-      io.emit(EVENTS.USER_ONLINE, userId);
+    if (onlineUsers.get(userId).size === 1) {
+      await User.findByIdAndUpdate(userId, { isOnline: true, lastSeen: null });
+      io.emit("user-online", userId);
     }
   });
 
-  socket.on("disconnect", () => {
-    for (const [userId, sockets] of onlineUsers) {
-      if (sockets.has(socket.id)) {
-        sockets.delete(socket.id);
-        if (sockets.size === 0) {
-          onlineUsers.delete(userId);
-          io.emit(EVENTS.USER_OFFLINE, userId);
-        }
-        break;
+  socket.on("disconnect", async () => {
+    const userId = socket.userId;
+    if (!userId) return;
+    const sockets = onlineUsers.get(userId);
+    if (sockets) {
+      sockets.delete(socket.id);
+      if (sockets.size === 0) {
+        onlineUsers.delete(userId);
+        await User.findByIdAndUpdate(userId, {
+          isOnline: false,
+          lastSeen: new Date(),
+        });
+        io.emit("user-offline", userId);
+      }
+    }
+  });
+
+  socket.on("user-offline", async (userId) => {
+    if (!userId) return;
+    const sockets = onlineUsers.get(userId);
+    if (sockets) {
+      sockets.delete(socket.id);
+      if (sockets.size === 0) {
+        onlineUsers.delete(userId);
+        await User.findByIdAndUpdate(userId, {
+          isOnline: false,
+          lastSeen: new Date(),
+        });
+        io.emit("user-offline", userId);
       }
     }
   });

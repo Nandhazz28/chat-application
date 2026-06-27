@@ -1,58 +1,47 @@
-import React from "react";
-import OnlineIndicator from "./OnlineIndicator";
-import UnreadBadge from "./UnreadBadge";
+import { useState } from "react";
+import ConversationItem from "./ConversationItem";
+import { Search } from "lucide-react";
 
-const ConversationItem = ({ conversation, active, onClick, onlineUsers = [] }) => {
-  const user = conversation?.participant || {};
-  const isOnline = onlineUsers.includes(user._id);
-  const displayName = user?.username || user?.name || "Unknown User";
-  const lastMsg = conversation?.lastMessage?.content || "No messages yet";
+const ConversationList = ({ conversations, activeId, onSelect, onlineUsers }) => {
+  const [search, setSearch] = useState("");
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      onClick?.();
-    }
-  };
+  const filtered = conversations.filter(c => {
+    const name = c?.participant?.username || "";
+    const last = c?.lastMessage?.content || "";
+    return name.toLowerCase().includes(search.toLowerCase()) || last.toLowerCase().includes(search.toLowerCase());
+  });
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={onClick}
-      onKeyDown={handleKeyDown}
-      className={`flex items-center gap-3.5 p-4 border-b border-white/5 cursor-pointer transition-all duration-200 outline-none select-none
-        ${active
-          ? "bg-gradient-to-r from-purple-500/15 via-pink-500/5 to-transparent relative after:absolute after:left-0 after:top-2 after:bottom-2 after:w-1 after:bg-gradient-to-b after:from-purple-500 after:to-pink-500 after:rounded-r-md"
-          : "hover:bg-white/[0.02]"
-        }
-        focus-visible:bg-white/[0.04]
-      `}
-    >
-      <div className="relative flex-shrink-0">
-        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 text-white flex items-center justify-center font-bold text-sm tracking-wide shadow-[0_0_15px_rgba(168,85,247,0.25)] border border-white/10">
-          {displayName.charAt(0).toUpperCase()}
-        </div>
-        <div className="absolute -bottom-0.5 -right-0.5 rounded-full ring-2 ring-[#030014]">
-          <OnlineIndicator online={isOnline} />
+    <div className="flex flex-col h-full">
+      <div className="px-3 pb-2">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search conversations…"
+            className="w-full pl-9 pr-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-xs placeholder-slate-500 focus:outline-none focus:border-purple-500/30 transition-all"
+          />
         </div>
       </div>
 
-      <div className="flex-1 min-w-0">
-        <div className="flex justify-between items-center gap-2 mb-1">
-          <h3 className={`text-sm font-semibold truncate transition-colors duration-150 ${active ? "text-white" : "text-slate-200"}`}>
-            {displayName}
-          </h3>
-          <div className="flex-shrink-0">
-            <UnreadBadge count={conversation?.unreadCount} />
-          </div>
-        </div>
-        <p className="text-xs text-slate-400 font-medium truncate tracking-wide">
-          {lastMsg}
-        </p>
+      <div className="flex-1 overflow-y-auto px-1 scrollbar-thin scrollbar-thumb-white/5">
+        {filtered.length === 0 ? (
+          <p className="text-center text-xs text-slate-600 font-mono py-8">No conversations found</p>
+        ) : (
+          filtered.map(conv => (
+            <ConversationItem
+              key={conv._id}
+              conversation={conv}
+              active={activeId === conv._id}
+              onClick={() => onSelect(conv)}
+              onlineUsers={onlineUsers}
+            />
+          ))
+        )}
       </div>
     </div>
   );
 };
 
-export default ConversationItem;
+export default ConversationList;

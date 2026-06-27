@@ -1,68 +1,47 @@
-import React from "react";
-import OnlineIndicator from "./OnlineIndicator";
-import UnreadBadge from "./UnreadBadge";
+import { formatTime } from "../../shared/utils/formatDate";
 
-const ConversationItem = ({
-  conversation,
-  active,
-  onClick,
-  onlineUsers = [],
-}) => {
-  const user = conversation?.participant || {};
-  const isOnline = onlineUsers.includes(user._id);
-
-  // Keyboard accessibility helper for interactive grid items
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      onClick?.();
-    }
-  };
+const ConversationItem = ({ conversation, active, onClick, onlineUsers = [] }) => {
+  const participant = conversation?.participant || {};
+  const isOnline    = onlineUsers.includes(String(participant._id));
+  const name        = participant?.username || "Unknown";
+  const lastMsg     = conversation?.lastMessage;
+  const lastText    = lastMsg?.content || (lastMsg?.imageUrl ? "📷 Image" : lastMsg?.audioUrl ? "🎤 Voice" : lastMsg?.fileUrl ? "📎 File" : "No messages yet");
+  const time        = lastMsg?.createdAt ? formatTime(lastMsg.createdAt) : "";
+  const unread      = conversation?.unreadCount || 0;
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <button
+      type="button"
       onClick={onClick}
-      onKeyDown={handleKeyDown}
-      className={`flex items-center gap-3.5 p-4 border-b border-white/5 cursor-pointer transition-all duration-200 outline-none select-none
-        ${
-          active
-            ? "bg-gradient-to-r from-purple-500/15 via-pink-500/5 to-transparent relative after:absolute after:left-0 after:top-2 after:bottom-2 after:w-1 after:bg-gradient-to-b after:from-purple-500 after:to-pink-500 after:rounded-r-md"
-            : "hover:bg-white/[0.02]"
-        }
-        focus-visible:bg-white/[0.04]
-      `}
+      className={`w-full flex items-center gap-3 px-3 py-3 text-left transition-all duration-200 rounded-xl mb-0.5 outline-none focus-visible:ring-2 focus-visible:ring-purple-500/50
+        ${active ? "bg-gradient-to-r from-purple-500/10 to-pink-500/5 border border-purple-500/20" : "hover:bg-white/[0.025] border border-transparent"}`}
     >
-      {/* Avatar Sub-station */}
+      {/* Avatar */}
       <div className="relative flex-shrink-0">
-        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 text-white flex items-center justify-center font-bold text-sm tracking-wide shadow-[0_0_15px_rgba(168,85,247,0.25)] border border-white/10">
-          {user?.name?.charAt(0) || "U"}
+        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 text-white flex items-center justify-center font-bold text-sm border border-white/10 shadow-md">
+          {name.charAt(0).toUpperCase()}
         </div>
-
-        {/* Indicator Alignment */}
-        <div className="absolute -bottom-0.5 -right-0.5 rounded-full ring-2 ring-[#030014]">
-          <OnlineIndicator online={isOnline} />
-        </div>
+        {isOnline && (
+          <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#030014] shadow-sm shadow-emerald-400/50" />
+        )}
       </div>
 
-      {/* Meta Text Matrix */}
+      {/* Content */}
       <div className="flex-1 min-w-0">
-        <div className="flex justify-between items-center gap-2 mb-1">
-          <h3 className={`text-sm font-semibold truncate transition-colors duration-150 ${active ? "text-white" : "text-slate-200"}`}>
-            {user?.name || "Unknown User"}
-          </h3>
-
-          <div className="flex-shrink-0">
-            <UnreadBadge count={conversation?.unreadCount} />
-          </div>
+        <div className="flex items-center justify-between mb-0.5">
+          <span className={`text-sm font-semibold truncate ${active ? "text-white" : "text-slate-200"}`}>{name}</span>
+          <span className="text-[10px] text-slate-500 font-mono flex-shrink-0 ml-1">{time}</span>
         </div>
-
-        <p className="text-xs text-slate-400 font-medium truncate tracking-wide">
-          {conversation?.lastMessage?.content || "No messages yet"}
-        </p>
+        <div className="flex items-center justify-between gap-1">
+          <p className="text-xs text-slate-400 truncate flex-1">{lastText}</p>
+          {unread > 0 && (
+            <span className="flex-shrink-0 min-w-[18px] h-[18px] rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[10px] font-bold flex items-center justify-center px-1">
+              {unread > 99 ? "99+" : unread}
+            </span>
+          )}
+        </div>
       </div>
-    </div>
+    </button>
   );
 };
 

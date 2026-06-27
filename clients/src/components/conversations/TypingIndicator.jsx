@@ -1,29 +1,16 @@
-import React from "react";
-
-const TypingIndicator = ({ user }) => {
+const TypingIndicator = ({ typingUser }) => {
+  if (!typingUser) return null;
   return (
-    <div className="flex items-center gap-2.5 px-3 py-1.5 w-fit bg-white/[0.02] border border-white/5 rounded-full backdrop-blur-md select-none animate-fade-in">
-      
-      {/* Cosmic Staggered Bouncing Wave Dots */}
-      <div className="flex items-center gap-1 px-1.5 py-1 rounded-full bg-purple-500/5 border border-purple-500/10">
-        <span 
-          className="w-1.5 h-1.5 bg-pink-400 rounded-full animate-bounce [animation-duration:0.8s]" 
-          style={{ animationDelay: "0ms" }}
-        />
-        <span 
-          className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce [animation-duration:0.8s]" 
-          style={{ animationDelay: "150ms" }}
-        />
-        <span 
-          className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-duration:0.8s]" 
-          style={{ animationDelay: "300ms" }}
-        />
+    <div className="flex items-center gap-2 px-4 py-1 animate-fade-in">
+      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold border border-white/10 flex-shrink-0">
+        {(typingUser.username || "?").charAt(0).toUpperCase()}
       </div>
-      
-      {/* System Font Identity String */}
-      <span className="text-xs font-mono tracking-wide text-slate-400 pr-1">
-        <span className="text-slate-200 font-semibold">{user?.name || "Agent"}</span> is typing...
-      </span>
+      <div className="flex items-center gap-1 px-3 py-2 rounded-2xl rounded-tl-sm bg-[#0f0a2e] border border-white/[0.07]">
+        {[0,1,2].map(i => (
+          <span key={i} className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-bounce"
+            style={{ animationDelay: `${i * 0.15}s` }} />
+        ))}
+      </div>
     </div>
   );
 };

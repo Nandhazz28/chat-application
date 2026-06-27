@@ -1,99 +1,129 @@
-import { useState } from "react";
-import { Plus, X, MessageSquareCode, Compass } from "lucide-react";
-import InboxPage from "./InboxPage";
-import ActiveChatPage from "./ActiveChatPage";
-import UserSearch from "../../components/conversations/UserSearch";
+import { useEffect, useState } from "react";
+import { Plus, X, MessageSquareCode, LogOut, User, Settings, Compass } from "lucide-react";
+import InboxPage          from "./InboxPage";
+import ActiveChatPage     from "./ActiveChatPage";
+import UserSearch         from "../../components/conversations/UserSearch";
 import { useChatContext } from "../../shared/context/ChatContext";
 import { useAuthContext } from "../../shared/context/AuthContext";
+import { useNavigate }    from "react-router-dom";
+import {
+  connectSocket, disconnectSocket,
+  userOnline, userOffline,
+  onUserOnline, onUserOffline, removeListener,
+} from "../../socket/socketManager";
+import { SOCKET_EVENTS } from "../../socket/events";
+import { logout as logoutService } from "../../services/auth.services";
 
 const ChatPage = () => {
-  const { activeConversation, setActiveConversation, setConversations } = useChatContext();
-  const { user } = useAuthContext();
+  const { activeConversation, setActiveConversation, setConversations, setOnlineUsers, onlineUsers } = useChatContext();
+  const { user, logout } = useAuthContext();
+  const navigate          = useNavigate();
   const [showSearch, setShowSearch] = useState(false);
 
-  const handleConversationCreated = (conversation) => {
-    // Normalize participant field
-    const other = conversation?.participants?.find(
-      (p) => String(p._id) !== String(user?._id)
-    );
-    const normalized = { ...conversation, participant: other || conversation?.participants?.[0] };
+  useEffect(() => {
+    connectSocket();
+    if (user?._id) userOnline(user._id);
 
-    setActiveConversation(normalized);
-    // Add to conversations list if not already there
-    setConversations((prev) => {
-      const exists = prev.find((c) => c._id === normalized._id);
-      if (exists) return prev;
-      return [normalized, ...prev];
-    });
+    onUserOnline((userId)  => setOnlineUsers(prev => [...new Set([...prev, String(userId)])]));
+    onUserOffline((userId) => setOnlineUsers(prev => prev.filter(id => id !== String(userId))));
+
+    return () => {
+      removeListener(SOCKET_EVENTS.USER_ONLINE);
+      removeListener(SOCKET_EVENTS.USER_OFFLINE);
+      if (user?._id) userOffline(user._id);
+    };
+  }, [user?._id]);
+
+  const handleConversationCreated = (conv) => {
+    setActiveConversation(conv);
+    setConversations(prev => prev.some(c => c._id === conv._id) ? prev : [conv, ...prev]);
     setShowSearch(false);
   };
 
+  const handleLogout = async () => {
+    if (user?._id) userOffline(user._id);
+    disconnectSocket();
+    await logoutService();
+    logout();
+    navigate("/login");
+  };
+
   return (
-    <div className="h-screen w-full bg-[#030014] text-slate-200 flex overflow-hidden font-sans selection:bg-pink-500/30">
+    <div className="h-screen w-full bg-[#030014] text-slate-200 flex overflow-hidden">
 
-      {/* SIDEBAR */}
-      <div className="w-full md:w-80 lg:w-96 border-r border-white/10 bg-[#080425]/30 backdrop-blur-2xl flex flex-col h-full relative z-20 flex-shrink-0">
+      <aside className="w-[320px] flex-shrink-0 border-r border-white/[0.06] bg-[#06031a]/80 backdrop-blur-xl flex flex-col h-full z-20">
 
-        {/* HEADER */}
-        <div className="p-4 border-b border-white/10 bg-[#06031a]/40 flex items-center justify-between select-none">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 flex items-center justify-center">
+        <div className="flex-shrink-0 flex items-center justify-between px-4 py-3.5 border-b border-white/[0.06]">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-600/20 to-pink-600/10 border border-purple-500/20 flex items-center justify-center">
               <MessageSquareCode className="w-4 h-4 text-pink-400" />
             </div>
-            <span className="text-xs font-mono uppercase tracking-widest font-bold text-white">
-              Core.Terminal
-            </span>
+            <div>
+              <span className="text-sm font-bold tracking-wide text-white">ChatApp</span>
+              <div className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[9px] font-mono text-emerald-500">live</span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-1 text-[9px] font-mono uppercase tracking-wider text-slate-500">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Node Live</span>
+          <div className="flex items-center gap-1">
+            <button onClick={() => navigate("/profile")}
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/[0.05] transition-all">
+              <User className="w-3.5 h-3.5" />
+            </button>
+            <button onClick={() => navigate("/settings")}
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/[0.05] transition-all">
+              <Settings className="w-3.5 h-3.5" />
+            </button>
+            <button onClick={handleLogout}
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-all">
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
 
-        {/* NEW CHAT BUTTON */}
-        <div className="p-4 bg-[#080425]/10 select-none">
-          <button
-            type="button"
-            onClick={() => setShowSearch(!showSearch)}
-            aria-expanded={showSearch}
-            className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-semibold tracking-wide transition-all duration-300 focus:outline-none
-              ${showSearch
-                ? "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10"
-                : "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-[0_0_15px_rgba(219,39,119,0.15)] hover:shadow-[0_0_25px_rgba(219,39,119,0.3)] hover:-translate-y-0.5 active:translate-y-0"
-              }`}
-          >
-            {showSearch ? (
-              <><X className="w-3.5 h-3.5 stroke-[2.5]" /> Cancel Discovery</>
-            ) : (
-              <><Plus className="w-3.5 h-3.5 stroke-[2.5]" /> Initiate New Transmission</>
-            )}
+        {user && (
+          <div className="flex-shrink-0 flex items-center gap-2.5 px-4 py-3 border-b border-white/[0.04] bg-white/[0.01]">
+            <div className="relative">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 flex items-center justify-center text-white text-xs font-bold border border-white/10">
+                {user.username?.charAt(0).toUpperCase()}
+              </div>
+              <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-400 border border-[#06031a]" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-white leading-tight">{user.username}</p>
+              <p className="text-[10px] text-slate-500 font-mono">● You are online</p>
+            </div>
+          </div>
+        )}
+
+        <div className="flex-shrink-0 px-3 py-3">
+          <button onClick={() => setShowSearch(!showSearch)}
+            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
+              showSearch
+                ? "bg-white/[0.03] border border-white/[0.07] text-slate-300 hover:bg-white/[0.05]"
+                : "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-950/30 hover:opacity-90 hover:-translate-y-0.5 active:translate-y-0"
+            }`}>
+            {showSearch ? <><X className="w-3.5 h-3.5" /> Cancel</> : <><Plus className="w-3.5 h-3.5" /> New Conversation</>}
           </button>
         </div>
 
-        {/* SEARCH OR INBOX */}
-        <div className="flex-1 flex flex-col overflow-hidden relative">
-          {showSearch ? (
-            <div className="absolute inset-0 z-30 bg-[#040217] flex flex-col">
-              <div className="p-3 border-b border-white/[0.06] bg-[#080425]/40 flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-purple-400 font-semibold select-none">
-                <Compass className="w-3.5 h-3.5 animate-spin [animation-duration:10s]" />
-                <span>Search Network Directories</span>
+        <div className="flex-1 overflow-hidden relative">
+          {showSearch && (
+            <div className="absolute inset-0 z-30 bg-[#06031a] flex flex-col overflow-y-auto">
+              <div className="flex-shrink-0 px-4 py-2 border-b border-white/[0.05] flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-purple-400 font-semibold">
+                <Compass className="w-3 h-3" /> Find people
               </div>
-              <div className="flex-1 overflow-y-auto">
-                <UserSearch onConversationCreated={handleConversationCreated} />
-              </div>
+              <UserSearch onConversationCreated={handleConversationCreated} />
             </div>
-          ) : null}
-
-          <div className="flex-1 overflow-y-auto">
-            <InboxPage />
-          </div>
+          )}
+          <InboxPage />
         </div>
-      </div>
+      </aside>
 
-      {/* MAIN CHAT AREA */}
-      <div className="flex-1 h-full bg-[#030014]/10 relative z-10">
+      <main className="flex-1 h-full overflow-hidden">
         <ActiveChatPage conversation={activeConversation} />
-      </div>
+      </main>
     </div>
   );
 };
