@@ -6,7 +6,6 @@ const findByEmail = (email) => User.findOne({ email });
 
 const findByUsername = (username) => User.findOne({ username });
 
-// Escape special regex chars to prevent ReDoS / NoSQL injection
 const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const searchUsers = (query, excludeId) => {

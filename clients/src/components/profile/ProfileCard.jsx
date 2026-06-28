@@ -17,7 +17,6 @@ const ProfileCard = ({ user }) => {
       <div className="absolute -bottom-10 -left-10 w-36 h-36 rounded-full bg-gradient-to-tr from-indigo-500/10 to-transparent blur-2xl pointer-events-none" />
       <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-pink-500/50 to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
 
-      {/* AVATAR */}
       <div className="relative flex items-start justify-between mb-5">
         <div className="relative">
           <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 flex items-center justify-center text-2xl font-bold text-white border border-white/10 shadow-lg shadow-purple-950/40 z-10 transition-transform duration-300 group-hover:scale-[1.03]">
@@ -38,7 +37,6 @@ const ProfileCard = ({ user }) => {
         </div>
       </div>
 
-      {/* INFO */}
       <div className="mb-4">
         <h3 className="text-lg font-bold text-white tracking-wide flex items-center gap-1.5">
           {displayName}
@@ -52,14 +50,12 @@ const ProfileCard = ({ user }) => {
         </div>
       </div>
 
-      {/* BIO */}
       {user?.bio && (
         <p className="text-xs text-slate-300 leading-relaxed tracking-wide border-t border-white/[0.04] pt-3 mb-4">
           {user.bio}
         </p>
       )}
 
-      {/* STATS */}
       <div className="grid grid-cols-3 gap-2 bg-white/[0.02] border border-white/5 rounded-xl p-3 mb-5 text-center">
         {stats.map((stat, idx) => (
           <div key={idx} className="flex flex-col">

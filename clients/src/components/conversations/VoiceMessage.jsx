@@ -53,7 +53,6 @@ const VoiceMessage = ({ audioUrl }) => {
         {playing ? <Pause className="w-4 h-4 text-white" /> : <Play className="w-4 h-4 text-white ml-0.5" />}
       </button>
 
-      {/* Waveform bar */}
       <div className="flex-1 relative h-1.5 bg-white/10 rounded-full overflow-hidden cursor-pointer"
         onClick={e => {
           const rect = e.currentTarget.getBoundingClientRect();

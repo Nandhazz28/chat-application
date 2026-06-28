@@ -8,7 +8,6 @@ const getProfile = async (userId) => {
 };
 
 const updateProfile = async (userId, data) => {
-  // Whitelist allowed fields — never let email/password be updated here
   const allowed = ["username", "bio", "avatar"];
   const filtered = {};
   for (const key of allowed) {

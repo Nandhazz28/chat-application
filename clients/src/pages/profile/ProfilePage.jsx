@@ -28,12 +28,10 @@ const ProfilePage = () => {
       </div>
       <div className="relative w-full max-w-lg">
         <div className="bg-[#06031a]/60 border border-white/[0.08] rounded-2xl overflow-hidden shadow-2xl backdrop-blur-xl">
-          {/* Banner */}
           <div className="h-24 bg-gradient-to-r from-purple-600/30 via-pink-600/20 to-indigo-600/30 relative">
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC4wNSIvPjwvc3ZnPg==')] opacity-50" />
           </div>
 
-          {/* Avatar */}
           <div className="px-6 pb-6 -mt-10">
             <div className="flex items-end justify-between mb-4">
               <div className="relative">

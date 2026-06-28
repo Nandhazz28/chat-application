@@ -10,13 +10,11 @@ const Input = ({
   error,
   disabled,
 }) => {
-  // Generates unique structural identity strings to link semantic assets perfectly
   const generatedId = useId();
   const inputId = name || generatedId;
 
   return (
     <div className="mb-5 w-full select-none animate-fade-in">
-      {/* Structural Form Field Header Label */}
       {label && (
         <label
           htmlFor={inputId}
@@ -27,7 +25,6 @@ const Input = ({
         </label>
       )}
 
-      {/* Subspace Form Input Capsule Wrapper */}
       <div
         className={`relative flex items-center w-full rounded-xl bg-white/[0.02] border backdrop-blur-md transition-all duration-300
           ${
@@ -50,7 +47,6 @@ const Input = ({
         />
       </div>
 
-      {/* Dynamic System Alert Messaging Layout */}
       {error && (
         <span
           role="alert"

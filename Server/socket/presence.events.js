@@ -1,8 +1,7 @@
 const User = require("../modules/users/user.model");
 const { SOCKET_EVENTS } = require("../constants");
 
-// In-memory fallback (works fine for single-server; swap redis for multi-server)
-const onlineSockets = new Map(); // userId -> Set<socketId>
+const onlineSockets = new Map(); 
 
 const setUserOnline = async (io, userId) => {
   await User.findByIdAndUpdate(userId, { isOnline: true, lastSeen: null });
@@ -18,20 +17,17 @@ const setUserOffline = async (io, userId) => {
 };
 
 const registerPresenceEvents = (io, socket) => {
-  const userId = socket.userId; // set by auth middleware in socket/index.js
+  const userId = socket.userId;
 
-  // Register this socket for the user
   if (!onlineSockets.has(userId)) {
     onlineSockets.set(userId, new Set());
   }
   onlineSockets.get(userId).add(socket.id);
 
-  // Mark online if this is their first connection
   if (onlineSockets.get(userId).size === 1) {
     setUserOnline(io, userId).catch(console.error);
   }
 
-  // Clean up on disconnect
   socket.on("disconnect", async () => {
     const sockets = onlineSockets.get(userId);
     if (!sockets) return;

@@ -3,14 +3,11 @@ import { User, Lock, LogOut, ChevronRight, Sliders, Radio, Sparkles } from "luci
 
 const SettingsPage = () => {
   const handleLogout = () => {
-    // Purge session telemetry payload from local device vectors
     localStorage.removeItem("token");
     
-    // Hard refresh forces clean context termination and tree demounting
     window.location.href = "/login";
   };
 
-  // Automated layout model schema for navigation indexes
   const settingsNavigation = [
     {
       to: "/profile",
@@ -31,16 +28,12 @@ const SettingsPage = () => {
   return (
     <div className="min-h-screen w-full bg-[#030014] flex items-center justify-center p-6 overflow-hidden relative selection:bg-pink-500/30">
       
-      {/* Deep-Space Ambient Diffusion Gradients */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-purple-600/10 to-pink-600/5 blur-[150px] pointer-events-none animate-pulse [animation-duration:7s]" />
 
-      {/* Main Settings Terminal Panel */}
       <div className="relative w-full max-w-2xl bg-[#080425]/40 border border-white/10 rounded-2xl p-8 shadow-2xl shadow-purple-950/20 backdrop-blur-xl z-10 transition-all duration-300 hover:border-purple-500/20">
         
-        {/* Horizontal edge micro-accent line */}
         <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-pink-500/40 to-transparent" />
 
-        {/* TERMINAL HEADER SECTION */}
         <div className="flex flex-col items-center text-center mb-8 select-none">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 shadow-[0_0_20px_rgba(168,85,247,0.15)] mb-3">
             <Sliders className="w-5 h-5 text-pink-400" />
@@ -54,7 +47,6 @@ const SettingsPage = () => {
           </p>
         </div>
 
-        {/* NAVIGATION LINK STACK LAYER */}
         <div className="space-y-4">
           {settingsNavigation.map((node) => {
             const IconComponent = node.icon;
@@ -66,7 +58,6 @@ const SettingsPage = () => {
                 className="group flex items-center justify-between p-4 bg-[#030014]/40 border border-white/5 hover:border-white/10 rounded-xl transition-all duration-300 hover:-translate-y-0.5 shadow-sm hover:shadow-purple-950/30"
               >
                 <div className="flex items-center gap-4">
-                  {/* Dynamic Adaptive Micro-Icon Container */}
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center border border-white/5 text-slate-400 transition-all duration-300 ${node.accentClass}`}>
                     <IconComponent className="w-4 h-4 stroke-[1.5]" />
                   </div>
@@ -80,13 +71,11 @@ const SettingsPage = () => {
                   </div>
                 </div>
                 
-                {/* Visual kinetic direction arrow */}
                 <ChevronRight className="w-4 h-4 text-slate-500 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-slate-300" />
               </Link>
             );
           })}
 
-          {/* DESTRUCTIVE ACTION DISPATCH ELEMENT (LOGOUT) */}
           <button
             type="button"
             onClick={handleLogout}
@@ -110,7 +99,6 @@ const SettingsPage = () => {
           </button>
         </div>
 
-        {/* METADATA SYSTEM CONTROL FOOTER FOOTPRINT */}
         <div className="mt-8 pt-5 border-t border-white/[0.06] flex items-center justify-between text-[9px] font-mono uppercase tracking-widest text-slate-600 select-none">
           <div className="flex items-center gap-1.5">
             <Radio className="w-3 h-3 text-emerald-500 animate-pulse" />

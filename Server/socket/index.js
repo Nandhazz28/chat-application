@@ -14,7 +14,6 @@ const initializeSocket = (server) => {
     pingInterval: 25000,
   });
 
-  // Authenticate socket connections
   io.use((socket, next) => {
     const token =
       socket.handshake.auth?.token ||

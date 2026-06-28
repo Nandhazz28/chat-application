@@ -15,14 +15,8 @@ export const getUserById = async (userId) => {
   return response.data;
 };
 
-export const searchUsers = async (username) => {
-  if (!username.trim()) return [];
-
-  const response = await api.get("/api/users/search", {
-    params: {
-      username,
-    },
-  });
-
-  return response.data.data;
+export const searchUsers = async (query) => {
+  if (!query?.trim()) return [];
+  const response = await api.get(`/api/users/search?q=${encodeURIComponent(query.trim())}`);
+  return response.data?.data || [];
 };

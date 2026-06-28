@@ -1,4 +1,6 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
+
+import ProtectedRoute from "./components/ui/ProtectedRoute";
 
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
@@ -19,14 +21,12 @@ import UnauthorizedPage from "./pages/errors/UnauthorizedPage";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <LoginPage />,
+    element: <Navigate to="/login" replace />,
   },
-
   {
     path: "/login",
     element: <LoginPage />,
   },
-
   {
     path: "/register",
     element: <RegisterPage />,
@@ -34,44 +34,65 @@ const router = createBrowserRouter([
 
   {
     path: "/chat",
-    element: <ChatPage />,
+    element: (
+      <ProtectedRoute>
+        <ChatPage />
+      </ProtectedRoute>
+    ),
   },
-
   {
     path: "/inbox",
-    element: <InboxPage />,
+    element: (
+      <ProtectedRoute>
+        <InboxPage />
+      </ProtectedRoute>
+    ),
   },
-
   {
     path: "/chat/:conversationId",
-    element: <ActiveChatPage />,
+    element: (
+      <ProtectedRoute>
+        <ActiveChatPage />
+      </ProtectedRoute>
+    ),
   },
-
   {
     path: "/profile",
-    element: <ProfilePage />,
+    element: (
+      <ProtectedRoute>
+        <ProfilePage />
+      </ProtectedRoute>
+    ),
   },
-
   {
     path: "/profile/edit",
-    element: <EditProfilePage />,
+    element: (
+      <ProtectedRoute>
+        <EditProfilePage />
+      </ProtectedRoute>
+    ),
   },
-
   {
     path: "/settings",
-    element: <SettingsPage />,
+    element: (
+      <ProtectedRoute>
+        <SettingsPage />
+      </ProtectedRoute>
+    ),
   },
-
   {
     path: "/privacy",
-    element: <PrivacyPage />,
+    element: (
+      <ProtectedRoute>
+        <PrivacyPage />
+      </ProtectedRoute>
+    ),
   },
 
   {
     path: "/unauthorized",
     element: <UnauthorizedPage />,
   },
-
   {
     path: "*",
     element: <NotFoundPage />,

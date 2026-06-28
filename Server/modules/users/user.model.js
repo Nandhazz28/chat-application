@@ -42,7 +42,6 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Exclude password from all queries by default
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
   delete obj.password;

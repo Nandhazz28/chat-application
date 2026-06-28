@@ -12,7 +12,6 @@ const OnlineIndicator = ({ online }) => {
             : "bg-slate-600/80 border border-white/5"
         }`}
     >
-      {/* Subspace Signal Waves (Ping animation for active users) */}
       {online && (
         <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-45 [animation-duration:1.5s]" />
       )}

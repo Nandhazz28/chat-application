@@ -1,5 +1,3 @@
-
-
 import React, { useState } from "react";
 import { User, Mail, Lock, Loader2 } from "lucide-react";
 
@@ -18,7 +16,10 @@ const RegisterForm = ({ onSubmit, loading }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="space-y-2">
-        <label htmlFor="username" className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-semibold">
+        <label
+          htmlFor="username"
+          className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-semibold"
+        >
           Username
         </label>
         <div className="relative">
@@ -38,7 +39,10 @@ const RegisterForm = ({ onSubmit, loading }) => {
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="email" className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-semibold">
+        <label
+          htmlFor="email"
+          className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-semibold"
+        >
           Email
         </label>
         <div className="relative">
@@ -58,7 +62,10 @@ const RegisterForm = ({ onSubmit, loading }) => {
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="password" className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-semibold">
+        <label
+          htmlFor="password"
+          className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-semibold"
+        >
           Password
         </label>
         <div className="relative">
@@ -83,7 +90,9 @@ const RegisterForm = ({ onSubmit, loading }) => {
         className="w-full mt-2 flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold py-3.5 rounded-xl shadow-[0_0_20px_rgba(219,39,119,0.3)] hover:shadow-[0_0_30px_rgba(219,39,119,0.5)] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed hover:-translate-y-0.5 active:translate-y-0 text-sm"
       >
         {loading ? (
-          <><Loader2 className="w-4 h-4 animate-spin" /> Creating Account...</>
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" /> Creating Account...
+          </>
         ) : (
           "Deploy Account"
         )}

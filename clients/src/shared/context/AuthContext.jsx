@@ -1,23 +1,27 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { getMe } from "../../services/auth.services";
+import { getToken, clearAuth } from "../../shared/utils/token";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser]     = useState(null);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const init = async () => {
+      const token = getToken();
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
         const data = await getMe();
         const userData = data?.data?.user || data?.data || null;
         setUser(userData);
       } catch {
+        clearAuth();
         setUser(null);
-        localStorage.removeItem("token");
       } finally {
         setLoading(false);
       }
@@ -25,8 +29,12 @@ export const AuthProvider = ({ children }) => {
     init();
   }, []);
 
-  const login  = (userData) => setUser(userData);
-  const logout = ()         => { localStorage.removeItem("token"); setUser(null); };
+  const login = useCallback((userData) => setUser(userData), []);
+
+  const logout = useCallback(() => {
+    clearAuth();
+    setUser(null);
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, setUser, loading, login, logout }}>
@@ -35,4 +43,8 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuthContext = () => useContext(AuthContext);
+export const useAuthContext = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuthContext must be used inside AuthProvider");
+  return ctx;
+};

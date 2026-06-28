@@ -54,7 +54,6 @@ try {
   console.error(err);
 }
 
-// Not found and error handlers (must be last)
 app.use(notFound);
 app.use(errorHandler);
 
