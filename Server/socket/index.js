@@ -7,7 +7,7 @@ const registerPresenceEvents = require("./presence.events");
 const initializeSocket = (server) => {
   const io = new Server(server, {
     cors: {
-      origin: process.env.CLIENT_URL ,
+      origin: process.env.CLIENT_URL || "https://opentunnel.vercel.app",
       credentials: true,
     },
     pingTimeout: 60000,
